@@ -1,11 +1,22 @@
-import {useState} from "react";
+import {useState,useContext,useEffect} from "react";
 import {useNavigate} from "react-router-dom";
+import {LoginContext} from "../App.tsx";
+
 
 function LoginForm() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const {user} = useContext(LoginContext)
 
     const navigate = useNavigate();
+    useEffect(() => {
+        if(user){
+            navigate("/home");
+        }
+
+
+    }, []);
+
     return (
         <div className="flex items-center justify-center w-full min-h-screen">
 

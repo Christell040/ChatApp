@@ -13,3 +13,12 @@ export type ChatHeader = {
     messageCountBadge: number;
     messagePreview: string;
 }
+
+export type User ={
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+    status: boolean;
+    admin: string;
+}

@@ -5,14 +5,8 @@
 // };
 
 // Members for each group
-export const mockMembers = {
-    1: ["christell@example.com", "sam@example.com", "lisa@example.com"],
-    2: ["christell@example.com", "backend@example.com"],
-    3: ["christell@example.com", "design@example.com"],
-    4: ["christell@example.com", "devops@example.com"]
-};
 
-export const newmockMembers =[
+export const mockMembers =[
     {groupId:1,memberEmail:"christell@example.com"},
     {groupId:1,memberEmail:"sam@example.com"},
     {groupId:1,memberEmail:"lisa@example.com"},

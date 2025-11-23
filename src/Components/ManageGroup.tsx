@@ -18,7 +18,6 @@ function ManageGroup({ selectedGroup, groups, setGroups, members, setMembers, on
     }, [selectedGroup]);
 
 
-
     // Save Changes
     const handleSave = () => {
         const updated = groups.map(group =>
@@ -29,40 +28,39 @@ function ManageGroup({ selectedGroup, groups, setGroups, members, setMembers, on
         alert("Changes saved!");
     };
 
-
-    //For Removing Members
+    // Remove Member
     const removeMember = (email) => {
         const groupId = selectedGroup.id;
-        const groupMembers = members[groupId] || [];
 
-        const filtered = groupMembers.filter(member => member !== email);
+        const filtered = members.filter(
+            (entry) => !(entry.groupId === groupId && entry.memberEmail === email)
+        );
 
-        setMembers({
-            ...members,
-            [groupId]: filtered
-        });
+        setMembers(filtered);
     };
 
 
-    // Delete a group
+    // Delete Group
     const deleteGroup = () => {
         // remove from groups
         setGroups(groups.filter(group => group.id !== selectedGroup.id));
 
-        // remove from members list
-        const updatedMembers = { ...members };
-        delete updatedMembers[selectedGroup.id];
-        setMembers(updatedMembers);
+        // remove all entries for this groupId
+        const filteredMembers = members.filter(
+            (entry) => entry.groupId !== selectedGroup.id
+        );
+
+        setMembers(filteredMembers);
 
         alert("Group deleted.");
         onClose();
     };
 
-
     // For Displaying Members
-    const groupMembers = members[selectedGroup.id] || [];
+    const groupMembers = members
+        .filter((entry) => entry.groupId === selectedGroup.id)
+        .map((entry) => entry.memberEmail);
 
-    // put owner first always
     const otherMembers = groupMembers.filter(member => member !== selectedGroup.owner);
 
 

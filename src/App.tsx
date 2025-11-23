@@ -1,37 +1,38 @@
 import './App.css'
 import LoginForm from "./Components/LoginForm.tsx";
-import ChatLayout from "./Components/ChatLayout.tsx";
+import ChatLayout from "./Pages/ChatLayout.tsx";
 import ManageGroup from "./Components/ManageGroup.tsx";
 import {Routes, Route} from "react-router-dom";
-import {createContext, useState} from "react";
-import type {User} from "./Components/types.ts";
+import {createContext, useContext, useState} from "react";
+import type {User} from "./types/types.ts";
 
 type Context = {
     user: User | null;
     setUser: (user: User | null) => void;
 }
 
-export const LoginContext = createContext<Context>({
-    user: null,
-    setUser: () => {
+const LoginContext = createContext<Context | null>(null);
+
+export const useLogin = () => {
+    const context = useContext(LoginContext);
+
+    if (context === null) {
+        throw new Error("useLogin must be used within the context!");
     }
-});
+    return context;
+}
 
 function App() {
     const [user, setUser] = useState<User | null>(null);
 
 
-
     return (
 
-        <LoginContext.Provider value={{
-            user,
-            setUser,
-        }}>
+        <LoginContext.Provider value={{ user, setUser }}>
             <Routes>
                 <Route path="/" element={<LoginForm/>}/>
                 <Route path="/home" element={<ChatLayout/>}/>
-                <Route path="/ManageGroup" element={<ManageGroup/>}/>
+                {/*<Route path="/ManageGroup" element={<ManageGroup/>}/>*/}
 
             </Routes>
         </LoginContext.Provider>

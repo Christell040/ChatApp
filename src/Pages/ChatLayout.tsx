@@ -1,12 +1,14 @@
-import {Send, Users} from "lucide-react";
+// import {Send, Users} from "lucide-react";
 import {useState} from "react";
 
-import Sidebar from "./Sidebar.tsx";
-import ChatPanel from "./ChatPanel.tsx";
+import Sidebar from "../Components/Sidebar.tsx";
+import ChatPanel from "../Components/ChatPanel.tsx";
 import {mockGroups} from "../data/mockGroups.ts";
 import {mockMessages} from "../data/mockMessages.ts";
 import {mockMembers} from "../data/mockMembers.ts";
-import ManageGroup from "./ManageGroup.tsx";
+import ManageGroup from "../Components/ManageGroup.tsx";
+import {useLogin} from "../App.tsx";
+import {useNavigate} from "react-router-dom";
 
 // Interfaces required by system - User interface,message interface,group head interface
 // Data to be mocked -Individual chats heads ,chat list heads
@@ -16,6 +18,13 @@ import ManageGroup from "./ManageGroup.tsx";
 
 
 export default function ChatLayout() {
+
+    const navigate = useNavigate();
+
+    //User Context
+    const {user} = useLogin();
+
+
     // Importing Data Models
     const [groups, setGroups] = useState(mockGroups);
     const [messages, setMessages] = useState(mockMessages);
@@ -37,7 +46,11 @@ export default function ChatLayout() {
             <div className=" h-screen grid grid-cols-[minmax(220px,300px)_minmax(300px,1fr)]">
 
                 {/*ChatList*/}
-                <Sidebar groups={groups} OnSelectGroup={(data)=>setSelectedGroup(data)}  />
+                <Sidebar
+                    groups={groups}
+                    OnSelectGroup={(data)=>setSelectedGroup(data)}
+                    members={members}
+                />
 
 
                 {/*<ChatPanel selectedGroup={selectedGroup} />*/}

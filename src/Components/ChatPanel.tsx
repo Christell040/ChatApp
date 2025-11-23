@@ -4,8 +4,14 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Send, Users} from "lucide-react";
+import {useLogin} from "../App.tsx";
 
 function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
+
+    //User Context
+    const {user} = useLogin();
+
+
 
     if (!selectedGroup) {
         return (
@@ -18,6 +24,7 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
             </div>
         );
     }
+
 
     // const [messages, setMessages] = useState(mockMessages);
     const [input, setInput] = useState("");
@@ -32,7 +39,7 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
         const newMessage = {
             id: messages.length + 1,
             groupId: selectedGroup.id,     // important
-            sender: "test@gmail",     // or dynamic user
+            sender: user?.email,     // or dynamic user
             text: text,
             date: new Date().toISOString()
         };

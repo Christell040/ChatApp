@@ -1,11 +1,13 @@
 import {Users} from "lucide-react";
+import {useLogin} from "../App.tsx";
 
 export default function SidebarHeader(){
+    const {user} = useLogin();
     return (
         <>
             <div className="p-3 mt-2">
                 <div className="flex w-full justify-between items-center mb-4">
-                    <p className="font-semibold ">Chats</p>
+                    <p className="font-semibold ">Welcome {user?.name}</p>
                     <button
                         type="submit"
                         className="border-2 border-black p-2 hover:bg-black

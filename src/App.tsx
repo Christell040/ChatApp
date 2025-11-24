@@ -5,6 +5,7 @@ import ManageGroup from "./Components/ManageGroup.tsx";
 import {Routes, Route} from "react-router-dom";
 import {createContext, useContext, useState} from "react";
 import type {User} from "./types/types.ts";
+import ManageUsers from "./Pages/ManageUsers.tsx";
 
 type Context = {
     user: User | null;
@@ -32,6 +33,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<LoginForm/>}/>
                 <Route path="/home" element={<ChatLayout/>}/>
+                <Route path="/admin2" element={<ManageUsers/>}/>
                 {/*<Route path="/ManageGroup" element={<ManageGroup/>}/>*/}
 
             </Routes>

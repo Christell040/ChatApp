@@ -1,13 +1,32 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { mockUsers } from "../data/mockUsers";
 import { Pencil, X } from "lucide-react";
-
+import type {User} from "../types/types.ts"
+import {deleteUser, getUsers, updateUser} from "../Services/userService.ts";
+import { createUser } from "../Services/userService";
 
 export default function ManageUsers() {
-    const [users, setUsers] = useState(mockUsers);
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const loadUsers = async () => {
+        try {
+            const data = await getUsers();
+            setUsers(data);
+        } catch (e) {
+            console.error("Failed to fetch users", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [newUser, setNewUser] = useState({
         name: "",
@@ -18,9 +37,10 @@ export default function ManageUsers() {
     });
 
     const [editUser, setEditUser] = useState<any>(null);
+    const [emailToDelete, setEmailToDelete] = useState<string>("");
 
     // ADD USER
-    function handleAddUser() {
+    async function handleAddUser() {
         if (
             !newUser.name.trim() ||
             !newUser.email.trim() ||
@@ -31,8 +51,20 @@ export default function ManageUsers() {
             return;
         }
 
-        const toAdd = { ...newUser, status: true };
-        setUsers([...users, toAdd]);
+        try {
+            const newUserObj = {
+                name: newUser.name,
+                email: newUser.email,
+                password: newUser.password,
+                admin: newUser.admin,
+                role: newUser.role,
+            };
+
+            const created = await createUser(newUserObj);
+        } catch(error){
+            console.error("Failed to create user", error);
+        }
+        loadUsers();
 
         setNewUser({
             name: "",
@@ -45,24 +77,60 @@ export default function ManageUsers() {
         setShowAddModal(false);
     }
 
-    // SAVE EDIT
-    function handleEditSave() {
-        const updated = users.map((u) =>
-            u.email === editUser.email ? editUser : u
-        );
+    // EDIT USER
+    async function handleEditSave() {
+        if (
+            !editUser.name.trim() ||
+            !editUser.email.trim() ||
+            !editUser.password.trim() ||
+            !editUser.admin.trim()
+        ) {
+            alert("All fields required");
+            return;
+        }
 
-        setUsers(updated);
+        try{
+            const editedUser={
+                name: editUser.name,
+                email: editUser.email,
+                password: editUser.password,
+                admin: editUser.admin,
+                role: editUser.role,
+            };
+            const edited = await updateUser(editedUser);
+
+            loadUsers();
+        }catch(error){
+            console.error("Failed to edit user", error);
+        }
+
         setShowEditModal(false);
+    }
+
+    // DELETE USER
+    async function handleDelete(email: string) {
+        try {
+            const deleted = await deleteUser(email);
+
+            if (deleted) {
+                loadUsers();
+            } else {
+                alert("User not found");
+            }
+        } catch (error) {
+            console.error("Failed to delete user", error);
+        }
     }
 
     return (
         <div className="p-6">
+
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-xl font-semibold">Manage Users</h1>
 
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="border-2 border-black px-4 py-2 "
+                    className="border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-all duration-200 "
                 >
                     + Add User
                 </button>
@@ -89,9 +157,11 @@ export default function ManageUsers() {
                         <td className="p-2 border-2 border-black">
                             {u.status ? "Active" : "Inactive"}
                         </td>
-                        <td className="p-2 border-2 border-black">
+                        <td className="p-2 border-b flex space-x-2">
+
+                            {/* EDIT BUTTON */}
                             <button
-                                className="border border-black p-2 flex items-center gap-1"
+                                className=" cursor-pointer border border-black p-2 hover:bg-black hover:text-white transition-all duration-200"
                                 onClick={() => {
                                     setEditUser({ ...u });
                                     setShowEditModal(true);
@@ -99,15 +169,64 @@ export default function ManageUsers() {
                             >
                                 <Pencil size={14} />
                             </button>
+
+                            {/* DELETE BUTTON (opens modal) */}
+                            <button
+                                className="border border-black p-2 cursor-pointer hover:bg-black hover:text-white transition-all duration-200"
+                                onClick={()=>{
+                                    setEmailToDelete(u.email);
+                                    setShowDeleteModal(true);   // NEW
+                                }}
+                            >
+                                <X size={14} />
+                            </button>
+
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
 
-            {/* ------------------------------------------------------ */}
+            {/*/!*Delete confirmation modal+/}*/}
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
+                    <div className="bg-white border border-black p-6 w-[350px]">
+
+                        <div className="flex justify-between mb-4">
+                            <h2 className="text-lg font-medium">Confirm Delete</h2>
+                            <X
+                                onClick={() => setShowDeleteModal(false)}
+                                className="cursor-pointer"
+                            />
+                        </div>
+
+                        <p className="mb-6">
+                            Are you sure you want to delete <b>{emailToDelete}</b>?
+                        </p>
+
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="border border-black px-4 py-2 hover:bg-black hover:text-white transition-all duration-200"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    handleDelete(emailToDelete);
+                                    setShowDeleteModal(false);
+                                }}
+                                className="border border-black px-4 py-2 hover:bg-black hover:text-white transition-all duration-200"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ADD USER MODAL */}
-            {/* ------------------------------------------------------ */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
                     <div className="bg-white border border-black p-6  w-[350px]">
@@ -189,9 +308,7 @@ export default function ManageUsers() {
                 </div>
             )}
 
-            {/* ------------------------------------------------------ */}
             {/* EDIT USER MODAL */}
-            {/* ------------------------------------------------------ */}
             {showEditModal && editUser && (
                 <div className="fixed inset-0 bg-black/70 flex justify-center items-center">
                     <div className="bg-white border-2 border-black p-6  w-[350px]">
@@ -213,6 +330,7 @@ export default function ManageUsers() {
                         />
 
                         <input
+                            disabled={editUser.email}
                             type="email"
                             value={editUser.email}
                             onChange={(e) =>

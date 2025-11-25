@@ -15,15 +15,15 @@ export default function Sidebar({groups,OnSelectGroup,members}){
 
     //Get Groups the user is a part of and renders
 
-    // 1. All membership entries for this user
+    //  All membership entries for this user
     const userMemberships = members.filter(
         (member) => member.memberEmail === user?.email
     );
 
-    // 2. Collect groupIds they belong to (fast lookup)
+    // Collect groupIds they belong to (fast lookup)
     const membershipSet = new Set(userMemberships.map(member => member.groupId));
 
-    // 3. Filter only groups they belong to
+    // Filter only groups they belong to
     const userGroups = groups.filter(group => membershipSet.has(group.id));
 
 
@@ -44,7 +44,7 @@ export default function Sidebar({groups,OnSelectGroup,members}){
 
                     {userGroups.map((group) => (
                         <li
-                            className="p-3 bg-white shadow border-2 border-r-0 border-l-0 hover:bg-gray-600 hover:text-white -mt-1 "
+                            className="p-3 bg-white shadow border-2 border-r-0 border-l-0 hover:bg-gray-300  -mt-1 "
                             key={group.id}
                             onClick={() => OnSelectGroup(group)}
                         >

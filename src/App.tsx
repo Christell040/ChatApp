@@ -8,8 +8,8 @@ import type {User} from "./types/types.ts";
 import ManageUsers from "./Pages/ManageUsers.tsx";
 
 type Context = {
-    user: User | null;
-    setUser: (user: User | null) => void;
+    user: User;
+    setUser: (user: User ) => void;
 }
 
 const LoginContext = createContext<Context | null>(null);
@@ -24,7 +24,14 @@ export const useLogin = () => {
 }
 
 function App() {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User>({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+        status: false,
+        admin: ""
+    });
 
 
     return (

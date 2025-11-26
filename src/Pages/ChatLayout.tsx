@@ -1,5 +1,5 @@
 // import {Send, Users} from "lucide-react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import Sidebar from "../Components/Sidebar.tsx";
 import ChatPanel from "../Components/ChatPanel.tsx";
@@ -9,6 +9,8 @@ import {mockMembers} from "../data/mockMembers.ts";
 import ManageGroup from "../Components/ManageGroup.tsx";
 import {useLogin} from "../App.tsx";
 import {useNavigate} from "react-router-dom";
+import {getGroups} from "../Services/groupService.ts";
+import type {Group} from "../types/types.ts";
 
 // Interfaces required by system - User interface,message interface,group head interface
 // Data to be mocked -Individual chats heads ,chat list heads
@@ -25,10 +27,36 @@ export default function ChatLayout() {
     const {user} = useLogin();
 
 
+    // Redirect if no user
+    useEffect(() => {
+        if (user.name=="") {
+            navigate("/");
+        }
+    }, [user, navigate]);
+
     // Importing Data Models
-    const [groups, setGroups] = useState(mockGroups);
+    const [groups, setGroups] = useState<Group[]>(mockGroups);
     const [messages, setMessages] = useState(mockMessages);
     const [members, setMembers] = useState(mockMembers);
+
+    const load = async () => {
+        try {
+            const data = await getGroups(user.email);
+            setGroups(data);
+        } catch (err) {
+            console.error("Failed to load groups", err);
+        }
+    };
+
+    const updateGroup = (group: Group) => {
+        setGroups(prev => prev.concat(group));
+    }
+
+    console.log(user.email)
+
+    useEffect(() => {
+        if (user.email) load();
+    }, []);
 
 
     // SharedState for sidebar and chatpanel
@@ -36,9 +64,6 @@ export default function ChatLayout() {
 
     //To render the manage page for a group
     const [showManage, setShowManage] = useState(false);
-
-
-
 
     return (
         < >
@@ -49,9 +74,8 @@ export default function ChatLayout() {
                 <Sidebar
                     groups={groups}
                     OnSelectGroup={(data)=>setSelectedGroup(data)}
-                    members={members}
+                    updateGroups = {(data)=>updateGroup(data)}
                 />
-
 
                 {/*<ChatPanel selectedGroup={selectedGroup} />*/}
 
@@ -67,8 +91,6 @@ export default function ChatLayout() {
                 ) : (
                     <ChatPanel
                         selectedGroup={selectedGroup}
-                        messages={messages}
-                        setMessages={setMessages}
                         onManageGroup={() => setShowManage(true)}
                     />
                 )}

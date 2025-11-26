@@ -36,6 +36,13 @@ export const mockUsers = [
         status: true,
         admin: "christell@example.com" },
 
+    { name: "Aaron",
+        email: "aaron.bediako@tlc.com",
+        password: "pwd",
+        role: "manager",
+        status: true,
+        admin: "christell@example.com" },
+
     { name: "DevOps Guy", email: "devops@example.com", password: "abcd", role: "user", status: true, admin: "christell@example.com" },
 ];
 

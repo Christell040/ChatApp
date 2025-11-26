@@ -15,12 +15,12 @@ function LoginForm() {
 
     const navigate = useNavigate();
     useEffect(() => {
-        if(user){
+        if(user.name != ""){
             navigate("/home");
         }
     }, [user, navigate]);
 
-    if (user) return null;
+    if (user.name !="") return null;
 
 
     //Handle Submit - To set the user for the whole context and redirect to home page
@@ -40,7 +40,7 @@ function LoginForm() {
             setUser(currentUser)
 
             navigate("/home")
-            alert(`Welcome ${currentUser.name}`);
+            alert(`Welcome ${currentUser.name}, ${currentUser.email}`);
         }else{
             alert("You have entered the wrong password")
             return;

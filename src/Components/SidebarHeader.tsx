@@ -1,11 +1,11 @@
-import {Users} from "lucide-react";
+import {Search, Users} from "lucide-react";
 import {useLogin} from "../App.tsx";
 
-export default function SidebarHeader(){
+export default function SidebarHeader({onBrowseGroups}){
     const {user} = useLogin();
     return (
         <>
-            <div className="p-3 mt-2">
+            <div className="p-3 mt-2 border-b-2">
                 <div className="flex w-full justify-between items-center mb-4">
                     <p className="font-semibold ">Welcome {user?.name}</p>
                     <button
@@ -22,6 +22,10 @@ export default function SidebarHeader(){
                         className="border-2 border-black p-2 hover:bg-gray-50 w-full mb-2"
                         placeholder="Search..."/>
                 </div>
+
+                <button onClick={onBrowseGroups}>
+                    <Search /> Browse All Groups
+                </button>
             </div>
         </>
     );

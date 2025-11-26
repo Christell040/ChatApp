@@ -1,17 +1,34 @@
 //Handles all message related activitiy
 //Takes in the selected group
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Send, Users} from "lucide-react";
 import {useLogin} from "../App.tsx";
+import type {Message, MessageRequest} from "../types/types.ts";
+import {getChatMessages, sendMessage} from "../Services/messageService.ts";
 
-function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
+function ChatPanel({selectedGroup,onManageGroup}) {
 
     //User Context
     const {user} = useLogin();
 
+    //Set the messages
+    const [messages, setMessages] = useState<Message[]>([]);
 
+    //For the input field
+    const [input, setInput] = useState("");
+
+    const loadMessages = async () => {
+        const result = await getChatMessages(selectedGroup.groupID);
+        setMessages(result);
+    };
+
+    useEffect(() => {
+        if (!selectedGroup) return;
+
+        loadMessages();
+    }, [selectedGroup]);
 
     if (!selectedGroup) {
         return (
@@ -26,25 +43,21 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
     }
 
 
-    // const [messages, setMessages] = useState(mockMessages);
-    const [input, setInput] = useState("");
-
-    const navigate = useNavigate();
-
-    const currentMessages = messages.filter(message => message.groupId === selectedGroup.id);
-
-    const addMessageToGroup = (text) => {
+    const addMessageToGroup = async (text) => {
         if (!text.trim()) return;
 
-        const newMessage = {
-            id: messages.length + 1,
-            groupId: selectedGroup.id,     // important
-            sender: user?.email,     // or dynamic user
-            text: text,
-            date: new Date().toISOString()
+        const newMessage : MessageRequest = {
+            sender: user.email,
+            message: text,
+            groupID: selectedGroup.groupID,
         };
 
-        setMessages(prev => [...prev, newMessage]);
+        console.log("Posting:", newMessage);
+
+
+        const response = await sendMessage(newMessage);
+
+        loadMessages();
     };
 
     return (
@@ -55,7 +68,7 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
                 <div className="h-[10%] min-h-[50px] flex items-center justify-between border-b-2 px-4 ">
                     <div>
                         <p className="font-semibold ">{selectedGroup.name}</p>  {/*Group name*/}
-                        <p className="text-sm text-gray-600">4 members</p>    {/*Number of members*/}
+                        {/*<p className="text-sm text-gray-600">4 members</p>    /!*Number of members*!/*/}
                     </div>
 
                     <div className="flex items-center justify-between space-x-2">
@@ -63,7 +76,6 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
                             className="border-2 px-4 py-2 hover:bg-black hover:text-white transition-all duration-200  "
                             onClick={onManageGroup}
                         >
-
                             Manage
                         </button>
                         <button className="border-2 p-2 hover:bg-black hover:text-white transition-all duration-200  ">
@@ -71,18 +83,20 @@ function ChatPanel({selectedGroup,messages,setMessages,onManageGroup}) {
                         </button>
                     </div>
                 </div>
+
+
                 {/*Chat-thread*/}
                 <div className="h-[80%] min-h-[300px] p-4 overflow-y-auto" >
                     {/*Individual ChatHead*/}
                     <ul className={"space-y-2"}>
-                        {currentMessages.map(message => (
-                            <li key={message.id}>
+                        {messages.map(message => (
+                            <li key={message.messageID}>
                                 <div className="border-2 min-w-[200px] max-w-[500px] p-4 flex justify-between items-end">
                                     <div className={"flex-1"}>
                                         <p className={"font-medium text-sm mb-1"}>{message.sender}</p>  {/*Username*/}
-                                        <p className={"break-words"}>{message.text} </p> {/*Message*/}
+                                        <p className={"break-words"}>{message.message} </p> {/*Message*/}
                                     </div>
-                                    <p className={"text-xs text-gray-600 shrink-0"}>{message.date} </p> {/*Time*/}
+                                    <p className={"text-xs text-gray-600 shrink-0"}>{message.timeUTC} </p> {/*Time*/}
 
                                 </div>
 

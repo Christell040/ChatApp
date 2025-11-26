@@ -1,12 +1,18 @@
 
 export type Message = {
-    id: number;
-    groupId: number;
-    senderEmail: string;
+    messageID: string;
+    sender: string;
     message: string;
-    dateTime: string;
+    group: string;
+    messageStatus:"active" | "inactive";
+    timeUTC: string;
 }
 
+export type MessageRequest = {
+    sender: string;
+    message: string;
+    groupID: string;
+}
 
 export type ChatHeader = {
     id: number;
@@ -25,9 +31,14 @@ export type User ={
 }
 
 export type Group = {
-    groupId: number;
+    groupID: number;
     name: string;
-    access:string;
+    type:"open"|"closed" |"private";
+    owner:string;
+}
+export type GroupRequest = {
+    name: string;
+    type:"open"|"closed"|"private";
     owner:string;
 }
 

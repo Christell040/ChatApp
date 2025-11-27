@@ -9,6 +9,7 @@ import type {Message, MessageRequest} from "../types/types.ts";
 import {getChatMessages, sendMessage} from "../Services/messageService.ts";
 
 function ChatPanel({selectedGroup,onManageGroup}) {
+    const navigate = useNavigate();
 
     //User Context
     const {user} = useLogin();
@@ -67,7 +68,7 @@ function ChatPanel({selectedGroup,onManageGroup}) {
                 {/*header*/}
                 <div className="h-[10%] min-h-[50px] flex items-center justify-between border-b-2 px-4 ">
                     <div>
-                        <p className="font-semibold ">{selectedGroup.name}</p>  {/*Group name*/}
+                        <p className="font-semibold ">{selectedGroup.groupName}</p>  {/*Group name*/}
                         {/*<p className="text-sm text-gray-600">4 members</p>    /!*Number of members*!/*/}
                     </div>
 
@@ -78,7 +79,9 @@ function ChatPanel({selectedGroup,onManageGroup}) {
                         >
                             Manage
                         </button>
-                        <button className="border-2 p-2 hover:bg-black hover:text-white transition-all duration-200  ">
+                        <button
+                            onClick={()=>navigate("/admin")}
+                            className="border-2 p-2 hover:bg-black hover:text-white transition-all duration-200  ">
                             <Users/>
                         </button>
                     </div>

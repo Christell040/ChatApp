@@ -6,6 +6,8 @@ import {Routes, Route} from "react-router-dom";
 import {createContext, useContext, useState} from "react";
 import type {User} from "./types/types.ts";
 import ManageUsers from "./Pages/ManageUsers.tsx";
+import AdminLogin from "./Components/AdminLogin.tsx";
+import {Toaster} from "react-hot-toast";
 
 type Context = {
     user: User;
@@ -13,6 +15,7 @@ type Context = {
 }
 
 const LoginContext = createContext<Context | null>(null);
+
 
 export const useLogin = () => {
     const context = useContext(LoginContext);
@@ -24,23 +27,22 @@ export const useLogin = () => {
 }
 
 function App() {
-    const [user, setUser] = useState<User>({
-        name: "",
-        email: "",
-        password: "",
-        role: "",
-        status: false,
-        admin: ""
-    });
+    const [admin,setAdmin] = useState<User>({name: "",email: "",password: "", role: 0,status: false,admin: ""});
+    const [user, setUser] = useState<User>({name: "",email: "",password: "",role: 0,status: false,admin: ""});
 
 
     return (
 
         <LoginContext.Provider value={{ user, setUser }}>
+            <Toaster position="top-center"   toastOptions={{duration: 3000}} />
             <Routes>
                 <Route path="/" element={<LoginForm/>}/>
                 <Route path="/home" element={<ChatLayout/>}/>
-                <Route path="/admin2" element={<ManageUsers/>}/>
+                <Route
+                    path="/admin"
+                    element={<AdminLogin setCurrentAdmin={(data) => setAdmin(data)} />}
+                />
+                <Route path="/userManagement" element={<ManageUsers admin={admin}/>}/>
                 {/*<Route path="/ManageGroup" element={<ManageGroup/>}/>*/}
 
             </Routes>

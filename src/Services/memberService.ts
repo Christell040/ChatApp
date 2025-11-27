@@ -1,14 +1,15 @@
 // src/Services/memberService.ts
 import { api } from "./axios";
-import type { Member } from "../types/types";
+import type {removeMemberRequest} from "../types/types.ts";
 
-export async function getMembers(groupId:string): Promise<Member[]> {
-    const res = await api.get(`/groupMembers/${groupId}`);
+export async function getMembers(groupID:string){
+    const res = await api.get("/getMemmbersOfGroup",{
+        params: {groupID}
+    });
     return res.data;
 }
 
-export async function removeMember(groupId: number, email: string): Promise<void> {
-    await api.delete("/groupMembers/deleteMember", {
-        params: { groupId, email },
-    });
+export async function removeMemberFromGroup(data:removeMemberRequest) {
+   const res =  await api.post("/removeMemberFromGroup", data);
+   return res.data;
 }

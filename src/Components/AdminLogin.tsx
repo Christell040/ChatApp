@@ -1,30 +1,19 @@
 import {useState,useEffect} from "react";
 import {useNavigate} from "react-router-dom";
-import { useLogin} from "../App.tsx";
 
-//Import the user models
-import {mockUsers} from "../data/mockUsers.ts";
+
 import {getUserByEmail, login} from "../Services/userService.ts";
 import type {LoginRequest} from "../types/types.ts";
 import toast from "react-hot-toast";
 // import type {User} from "../types/types.ts";
 
 
-function LoginForm() {
+function AdminLogin({setCurrentAdmin}) {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('')
-    //Call to the Use Context
-    const {user,setUser} = useLogin()
+
 
     const navigate = useNavigate();
-    useEffect(() => {
-        if(user.name != ""){
-            navigate("/home");
-        }
-    }, [user, navigate]);
-
-    if (user.name !="") return null;
-
 
     //Handle Submit - To set the user for the whole context and redirect to home page
 
@@ -43,13 +32,13 @@ function LoginForm() {
         if (status === 200) {
             //construct the user and set
             const currentUser = await getUserByEmail(email)
-            setUser(currentUser)
+            setCurrentAdmin(currentUser)
 
-            // alert("Login successful");
-            toast.success(`Welcome ${currentUser.name}, ${currentUser.email}`)
-            navigate("/home")
+            navigate("/userManagement");
+            toast.success(`Welcome Admin ${currentUser.name}`);
+
         } else if (status === 401) {
-            alert("Wrong credentials");
+            toast.error(`Wrong Credentials`);
             return;
         }
 
@@ -62,9 +51,9 @@ function LoginForm() {
 
 
             <div className="flex flex-col items-center justify-center border-2 p-10 w-100">
-                <h3 className="text-xl">Turntabl-Chat Login</h3>
+                <h3 className="text-xl">Turntabl-Chat Admin Login</h3>
                 <form onSubmit={handleSubmit}
-                    className="space-y-4 w-full">
+                      className="space-y-4 w-full">
                     {/*Email*/}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 mt-3">
@@ -108,4 +97,4 @@ function LoginForm() {
         </div>
     );
 }
-export default LoginForm;
+export default AdminLogin;

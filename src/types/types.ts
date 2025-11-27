@@ -1,4 +1,9 @@
 
+export type LoginRequest = {
+    email: string
+    password: string
+}
+
 export type Message = {
     messageID: string;
     sender: string;
@@ -21,11 +26,19 @@ export type ChatHeader = {
     messagePreview: string;
 }
 
+export type UserCreation={
+    userID: string,
+    admin:string,
+    password: string,
+    name: string,
+    role:number
+}
+
 export type User ={
-    name: string;
     email: string;
+    name: string;
     password: string;
-    role: string;
+    role: number;
     status: boolean;
     admin: string;
 }
@@ -53,4 +66,42 @@ export type UserRequest = {
     password: string;
     role: string;
     admin: string;
+}
+
+export type editGroup={
+    groupID: string;
+    groupName: string;
+    type: string;
+}
+
+export type removeMemberRequest = {
+    groupID: string;
+    userID: string;
+    managerUserID: string;
+}
+
+export type GroupMember = {
+    email: string;
+    name: string;
+    role: string;
+    status: string;
+};
+
+export type addToGroupRequest = {
+    owner: string;
+    userToAdd: string;
+    groupID: string;
+}
+
+export type requestToJoin = {
+    groupID: string;
+    requesteruserID: string;
+}
+
+export type joinGroupRequest = {
+    requestID: string;
+    userID: string;
+    groupName: string;
+    groupID: string;
+    status :string;
 }

@@ -1,13 +1,22 @@
 import {useEffect, useState} from "react";
-import { mockUsers } from "../data/mockUsers";
 import { Pencil, X } from "lucide-react";
-import type {User} from "../types/types.ts"
+import type {User, UserCreation} from "../types/types.ts"
 import {deleteUser, getUsers, updateUser} from "../Services/userService.ts";
 import { createUser } from "../Services/userService";
+import {useNavigate} from "react-router-dom";
 
-export default function ManageUsers() {
+// TODO - Integrate Edits
+// TODO - Integrate Delete User
+
+export default function ManageUsers({admin}) {
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
+
+    useEffect(()=>{
+        if(admin.email == ""){
+            navigate("/admin");
+        }
+    },[admin])
 
     const loadUsers = async () => {
         try {
@@ -15,14 +24,12 @@ export default function ManageUsers() {
             setUsers(data);
         } catch (e) {
             console.error("Failed to fetch users", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+    };}
 
     useEffect(() => {
         loadUsers();
     }, []);
+
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -30,10 +37,10 @@ export default function ManageUsers() {
 
     const [newUser, setNewUser] = useState({
         name: "",
-        email: "",
+        userID: "",
         password: "",
-        role: "user",
-        admin: "",
+        role: 0,
+        admin: admin.email,
     });
 
     const [editUser, setEditUser] = useState<any>(null);
@@ -43,7 +50,7 @@ export default function ManageUsers() {
     async function handleAddUser() {
         if (
             !newUser.name.trim() ||
-            !newUser.email.trim() ||
+            !newUser.userID.trim() ||
             !newUser.password.trim() ||
             !newUser.admin.trim()
         ) {
@@ -52,9 +59,9 @@ export default function ManageUsers() {
         }
 
         try {
-            const newUserObj = {
+            const newUserObj : UserCreation = {
                 name: newUser.name,
-                email: newUser.email,
+                userID: newUser.userID,
                 password: newUser.password,
                 admin: newUser.admin,
                 role: newUser.role,
@@ -68,10 +75,10 @@ export default function ManageUsers() {
 
         setNewUser({
             name: "",
-            email: "",
+            userID: "",
             password: "",
-            role: "user",
-            admin: "",
+            role: 0,
+            admin: admin.email,
         });
 
         setShowAddModal(false);
@@ -251,9 +258,9 @@ export default function ManageUsers() {
                         <input
                             type="email"
                             placeholder="Email"
-                            value={newUser.email}
+                            value={newUser.userID}
                             onChange={(e) =>
-                                setNewUser({ ...newUser, email: e.target.value })
+                                setNewUser({ ...newUser, userID: e.target.value })
                             }
                             className="w-full border border-black p-2  mb-3"
                         />
@@ -271,22 +278,22 @@ export default function ManageUsers() {
                         <select
                             value={newUser.role}
                             onChange={(e) =>
-                                setNewUser({ ...newUser, role: e.target.value })
+                                setNewUser({ ...newUser, role: Number(e.target.value) })
                             }
-                            className="w-full border border-black p-2  mb-3"
+                            className="w-full border border-black p-2 mb-3"
                         >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
+                            <option value={0}>User</option>
+                            <option value={1}>Manager</option>
+                            <option value={2}>Admin</option>
                         </select>
 
+
                         <input
+                            disabled
                             type="text"
-                            placeholder="Admin email"
-                            value={newUser.admin}
-                            onChange={(e) =>
-                                setNewUser({ ...newUser, admin: e.target.value })
-                            }
-                            className="w-full border border-black p-2  mb-4"
+                            placeholder={admin.email}
+                            value={admin.email} //Because the backend returns email but takes ID
+                            className="w-full border border-black p-2  mb-4 text-blue-800"
                         />
 
                         <div className="flex justify-end gap-3">
@@ -384,4 +391,5 @@ export default function ManageUsers() {
             )}
         </div>
     );
+
 }

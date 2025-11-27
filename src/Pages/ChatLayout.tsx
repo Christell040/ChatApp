@@ -48,9 +48,7 @@ export default function ChatLayout() {
         }
     };
 
-    const updateGroup = (group: Group) => {
-        setGroups(prev => prev.concat(group));
-    }
+
 
     console.log(user.email)
 
@@ -74,7 +72,7 @@ export default function ChatLayout() {
                 <Sidebar
                     groups={groups}
                     OnSelectGroup={(data)=>setSelectedGroup(data)}
-                    updateGroups = {(data)=>updateGroup(data)}
+                    loadGroups={load}
                 />
 
                 {/*<ChatPanel selectedGroup={selectedGroup} />*/}
@@ -82,10 +80,6 @@ export default function ChatLayout() {
                 {showManage ? (
                     <ManageGroup
                         selectedGroup={selectedGroup}
-                        groups={groups}
-                        setGroups={setGroups}
-                        members={members}
-                        setMembers={setMembers}
                         onClose={() => setShowManage(false)}
                     />
                 ) : (

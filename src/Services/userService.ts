@@ -1,26 +1,38 @@
 import {api} from "../Services/axios.ts"
-import type {User, UserRequest} from "../types/types.ts"
+import type {LoginRequest, User, UserCreation, UserRequest} from "../types/types.ts"
 
-//Get-Methods
+// userLogin
+export async function login(data: LoginRequest) {
+    try {
+        const res = await api.post("/login", data);
+        return res.status;
+    } catch (err: any) {
+        if (err.response?.status === 401) {
+            return 401;
+        }
+        throw err;
+    }
+}
+
 
 //getAllUsers
 export async function getUsers():Promise<User[]> {
-    const response = await api.get("/users")
+    const response = await api.get("/getAllUsers")
     return response.data
 }
 
 //getUserByEmail
-export async function getUserByEmail(email: string): Promise<User> {
-    const response = await api.get("/users/search", {
-        params: { email }
+export async function getUserByEmail(userID: string): Promise<User> {
+    const response = await api.get("/getUser", {
+        params: { userID }
     });
     return response.data;
 }
 
 //Post-Methods
 // createUser
-export async function createUser(data: UserRequest): Promise<User> {
-    const response = await api.post("/users/createUser", data);
+export async function createUser(data: UserCreation){
+    const response = await api.post("/createUser", data);
     return response.data;
 }
 

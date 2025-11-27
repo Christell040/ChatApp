@@ -1,23 +1,41 @@
 import SidebarHeader from "./SidebarHeader.tsx";
 import NewGroupButton from "./NewGroupButton.tsx";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useLogin} from "../App.tsx";
-import {createGroup, getGroups} from "../Services/groupService.ts";
-import type {GroupRequest} from "../types/types.ts";
+import {createGroup, getAllGroups, getGroups, requestOpenGroup, requestToJoinGroup} from "../Services/groupService.ts";
+import type {addToGroupRequest, Group, GroupRequest, requestToJoin} from "../types/types.ts";
+import toast from "react-hot-toast";
 
-export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
+export default function Sidebar({groups,OnSelectGroup,loadGroups}) {
+
     //To trigger the create group modal
     const [isCreateGroup, setIsCreateGroup] = useState(false);
 
     const {user} = useLogin();
 
-    //State Handlers For Group Form
+    //State Handlers For Create Group Form
     const [newGroupName, setNewGroupName] = useState("");
     const [newGroupType, setNewGroupType] = useState<"open"|"closed"|"private">("open");
 
+    //State Handlers for triggering show browse groups
     const [showBrowseGroups, setShowBrowseGroups] = useState(false);
 
+    //Get All Groups in the System
+    const [allGroups, setAllGroups] = useState<Group[]>([]);
+
+    const loadAllGroups = async () => {
+        try{
+            const data = await getAllGroups();
+            setAllGroups(data);
+        }catch(err){
+            console.error("Failed to load all system groups",err)
+        }
+    }
+
+    useEffect(() => {
+        loadAllGroups();
+    },[])
 
     const handleCreateGroup = async (e) => {
         e.preventDefault();
@@ -29,13 +47,70 @@ export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
 
         const id = await createGroup(newGroup);
 
-        updateGroups({
-            groupID:id,
-            ...newGroup
-        });
+        loadGroups();
 
         setIsCreateGroup(false);
     }
+
+    //Membership check for each group
+    function getJoinLabel(group, userGroups) {
+        const isInGroup = userGroups.some(g => g.groupID === group.groupID);
+
+        if (isInGroup) return "Joined";
+
+        if (group.type === "closed") return "Request to Join";
+
+        if (group.type === "open") return "Join";
+
+        return "";
+
+    }
+
+    function handleJoinAction(group, userGroups) {
+        const label = getJoinLabel(group, userGroups);
+
+        if (label === "Join") {
+            return joinOpenGroup(group);
+        }
+
+        if (label === "Request to Join") {
+            return requestJoinClosedGroup(group);
+        }
+    }
+
+    async function requestJoinClosedGroup(group) {
+        const request: requestToJoin = {
+            groupID:group.groupID,
+            requesteruserID: user.email
+        }
+        try {
+            await requestToJoinGroup(request);
+            toast.success("Request sent!");
+        } catch {
+            toast.error("Failed to send request");
+        }
+
+    }
+
+    async function joinOpenGroup(group) {
+        const request: addToGroupRequest = {
+            owner:group.owner,
+            userToAdd: user.email,
+            groupID:group.groupID,
+        }
+        try{
+            await requestOpenGroup(request);
+            loadGroups();
+            toast.success("You have joined group");
+        }catch{
+            toast.error("Failed to add you to group");
+        }
+    }
+
+
+
+
+
 
     return(
         <>
@@ -48,15 +123,15 @@ export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
                 {/* SCROLLABLE GROUP LIST */}
                 <div className="flex-1 overflow-y-auto">
                     <ul className="space-y-0">
-                        {groups.map((group) => (
+                        {groups && groups.map((group) => (
                             <li
                                 className="p-3 bg-white shadow border-2 border-r-0 border-l-0 hover:bg-gray-300 -mt-1"
-                                key={group.groupId}
+                                key={group.groupID}
                                 onClick={() => OnSelectGroup(group)}
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-semibold">{group.name}</p>
+                                        <p className="font-semibold">{group.groupName}</p>
                                     </div>
                                     <div className="w-6 h-6 flex items-center justify-center border text-sm font-medium">
                                         3
@@ -150,7 +225,7 @@ export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white w-[80%] max-w-3xl h-[85%] rounded-lg shadow-xl flex flex-col"
+                        className="bg-white w-[80%] max-w-3xl h-[85%]  shadow-xl flex flex-col"
                     >
                         {/* Top bar */}
                         <div className="flex items-center justify-between border-b p-4">
@@ -176,41 +251,42 @@ export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
                         {/* Scrollable groups area */}
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
-                            {/* Dummy group card */}
-                            {[1,2,3,4].map((i) => (
+                            {/* REAL GROUP CARDS (same design as dummy) */}
+                            {allGroups.map((group) => (
                                 <div
-                                    key={i}
-                                    className="border p-4 rounded-lg shadow-sm bg-white"
+                                    key={group.groupID}
+                                    className="border p-4  shadow-sm bg-white"
                                 >
                                     {/* Header row */}
                                     <div className="flex justify-between items-center mb-2">
-                                        <p className="font-semibold">Design Team</p>
+                                        <p className="font-semibold">{group.name}</p>
 
                                         {/* Label */}
-                                        <span className="border px-2 py-1 text-sm rounded">
-                                Open
+                                        <span className="border px-2 py-1 text-sm  capitalize">
+                                {group.type}
                             </span>
                                     </div>
 
                                     {/* Description */}
                                     <p className="text-sm text-gray-600">
-                                        UI/UX design discussions
+                                        No description
                                     </p>
-
-                                    {/* Members */}
-                                    <p className="text-xs text-gray-500 mt-1">4 members</p>
 
                                     {/* Button aligned right */}
                                     <div className="flex justify-end mt-3">
-                                        <button className="border px-3 py-1 text-sm hover:bg-gray-100">
-                                            {i % 2 === 0
-                                                ? "Request to Join"
-                                                : "Joined"}
+                                        <button
+                                            onClick={() => handleJoinAction(group, groups)}
+                                            className="border px-3 py-1 text-sm hover:bg-black hover:text-white">
+                                            {getJoinLabel(group, groups)}
                                         </button>
                                     </div>
                                 </div>
                             ))}
+
                         </div>
+
+
+
 
                         {/* Footer legend */}
                         <div className="border-t p-4 text-xs text-gray-600">
@@ -221,9 +297,13 @@ export default function Sidebar({groups,OnSelectGroup,updateGroups}) {
                                 <li><strong>Private:</strong> Invite only</li>
                             </ul>
                         </div>
+
                     </div>
                 </div>
             )}
+
+
+
 
         </>
     );
